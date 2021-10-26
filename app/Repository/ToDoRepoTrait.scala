@@ -12,4 +12,8 @@ trait ToDoRepoTrait {
   def addTodoList(newList: NewToDoList): Option[ToDoList]
   def updateTodoList(listId: Long, updatedList: UpdateToDoList): Option[ToDoList]
   def deleteToDoList(listId: Long): Boolean
+  def getTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String]): Option[List[TaskItem]]
+  def addTaskToList(listId: Long, task: NewTask): Option[TaskItem]
 }
+
+

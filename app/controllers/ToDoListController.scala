@@ -2,6 +2,10 @@ package controllers
 
 import Repository.ToDoRepoTrait
 import models._
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
 
 import javax.inject._
 import play.api.mvc._
@@ -14,8 +18,11 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
   implicit val todoListJson = Json.format[ToDoList]
   implicit val newToDoListJson = Json.format[NewToDoList]
   implicit val updateToDoListJson = Json.format[UpdateToDoList]
+  implicit val taskItemJson = Json.format[TaskItem]
+  implicit val newTaskJson = Json.format[NewTask]
 
-  def getAll: Action[AnyContent] = Action {
+
+  def getAllLists: Action[AnyContent] = Action {
     val todoLists = repo.getToDoLists
     if(todoLists.isEmpty) {
       NoContent
@@ -62,8 +69,40 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
       }
   }
 
-  def deleteList(listId: Long) = Action { implicit request =>
+  def deleteList(listId: Long) = Action {
     if(repo.deleteToDoList(listId)) Ok
     else BadRequest
+  }
+
+  def getListTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String]) = Action {
+    val tasksOpt =  repo.getTasks(listId, priority, completed, orderby)
+    tasksOpt match
+    {
+      case Some(tasks) => {
+        if(tasks.isEmpty) {
+          NoContent
+        } else {
+          Ok(Json.toJson(tasks))
+        }
+      }
+      case None => NoContent
+    }
+  }
+
+  def addListTask(listId: Long) = Action { implicit request =>
+    val jsonBody = request.body.asJson
+
+    jsonBody
+      .map {json =>
+        val newTaskObj = json.as[NewTask]
+        repo.addTaskToList(listId, newTaskObj) match {
+          case Some(task) => Created(Json.toJson(task))
+          case None => BadRequest
+        }
+      }
+      .getOrElse{
+        BadRequest("Expecting application/json request body")
+      }
+
   }
 }

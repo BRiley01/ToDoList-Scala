@@ -1,12 +1,12 @@
-GET     /api/v1/todo-lists                              controllers.ToDoListController.getAll
+GET     /api/v1/todo-lists                              controllers.ToDoListController.getAllLists
 GET     /api/v1/todo-lists/:listId                      controllers.ToDoListController.getList(listId: Long)
 POST    /api/v1/todo-lists                              controllers.ToDoListController.addNewToDoList
 PUT     /api/v1/todo-lists/:listId                      controllers.ToDoListController.updateList(listId: Long)
 DELETE  /api/v1/todo-lists/:listId                      controllers.ToDoListController.deleteList(listId: Long)
 
-#GET     /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.getListTasks(listId)
+GET     /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.getListTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String])
 #GET     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.getListTasks(listId, taskId)
-#POST    /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.addListTask(listId, taskId)
+POST    /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.addListTask(listId: Long)
 #PUT     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
 #DELETE  /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
 
