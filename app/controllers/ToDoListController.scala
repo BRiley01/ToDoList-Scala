@@ -13,6 +13,7 @@ import scala.collection.mutable
 class ToDoListController @Inject()(val controllerComponents: ControllerComponents, repo: ToDoRepoTrait) extends BaseController {
   implicit val todoListJson = Json.format[ToDoList]
   implicit val newToDoListJson = Json.format[NewToDoList]
+  implicit val updateToDoListJson = Json.format[UpdateToDoList]
 
   def getAll: Action[AnyContent] = Action {
     val todoLists = repo.getToDoLists
@@ -38,6 +39,21 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
       .map {json =>
         repo.addTodoList(json.as[NewToDoList]) match {
           case Some(listItem) => Created(Json.toJson(listItem))
+          case None => BadRequest
+        }
+      }
+      .getOrElse{
+        BadRequest("Expecting application/json request body")
+      }
+  }
+
+  def updateList(listId: Long) = Action { implicit request =>
+    val jsonBody = request.body.asJson
+
+    jsonBody
+      .map {json =>
+        repo.updateTodoList(listId, json.as[UpdateToDoList]) match {
+          case Some(listItem) => Ok(Json.toJson(listItem))
           case None => BadRequest
         }
       }
