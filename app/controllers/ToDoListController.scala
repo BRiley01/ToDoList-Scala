@@ -61,4 +61,9 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
         BadRequest("Expecting application/json request body")
       }
   }
+
+  def deleteList(listId: Long) = Action { implicit request =>
+    if(repo.deleteToDoList(listId)) Ok
+    else BadRequest
+  }
 }

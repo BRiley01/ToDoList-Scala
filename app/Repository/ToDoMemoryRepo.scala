@@ -32,4 +32,13 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
     todoLists += toAdd
     Some(toAdd)
   }
+
+  override def deleteToDoList(listId: Long): Boolean = {
+    val index = todoLists.indexWhere(l => l.id == listId)
+    if(index == -1)
+      false
+    todoLists.remove(index)
+    true
+  }
+
 }
