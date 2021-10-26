@@ -1,7 +1,7 @@
 package Repository
 
 import com.google.inject.ImplementedBy
-import models.ToDoList
+import models._
 
 import scala.collection.mutable.ListBuffer
 
@@ -9,4 +9,6 @@ import scala.collection.mutable.ListBuffer
 trait ToDoRepoTrait {
   def getToDoLists: ListBuffer[ToDoList]
   def getList(listId: Long): Option[ToDoList]
+  def addTodoList(newList: NewToDoList): Option[ToDoList]
+
 }
