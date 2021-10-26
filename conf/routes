@@ -1,10 +1,19 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
+GET     /api/v1/todo-lists                              controllers.ToDoListController.getAll
+#GET     /api/v1/todo-lists/:listId                      controllers.ToDoListController.getList(listId)
+#POST    /api/v1/todo-lists                              controllers.ToDoListController.addNewList
+#PUT     /api/v1/todo-lists/:listId                      controllers.ToDoListController.updateList(listId)
+#DELETE  /api/v1/todo-lists/:listId                      controllers.ToDoListController.deleteList(listId)
 
-# An example controller showing a sample home page
-GET     /                           controllers.HomeController.index()
+#GET     /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.getListTasks(listId)
+#GET     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.getListTasks(listId, taskId)
+#POST    /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.addListTask(listId, taskId)
+#PUT     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
+#DELETE  /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+#https://stackoverflow.com/questions/31462673/how-to-use-joda-datetime-with-play-json
+#In play 2.6, the canonical way to serialize/deserialize joda DateTime json is by using the play-json-joda library. Import the library by updating your build.sbt. Then create json reader and json writers like this :
+
+#import play.api.libs.json.JodaWrites
+#implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("dd/MM/yyyy HH:mm:ss")
+#import play.api.libs.json.JodaReads
+#implicit val dateTimeJsReader = JodaReads.jodaDateReads("yyyyMMddHHmmss")
