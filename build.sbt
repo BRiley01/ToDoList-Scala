@@ -9,6 +9,11 @@ scalaVersion := "2.13.6"
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+// https://mvnrepository.com/artifact/com.typesafe.play/play-json-joda
+libraryDependencies += "com.typesafe.play" %% "play-json-joda" % "2.7.4"
+
+
+
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.brian.controllers._"
