@@ -1,6 +1,8 @@
 package controllers
 
+import Repository.ToDoRepoTrait
 import models._
+
 import javax.inject._
 import play.api.mvc._
 import play.api.libs.json._
@@ -8,14 +10,11 @@ import play.api.libs.json._
 import scala.collection.mutable
 
 @Singleton
-class ToDoListController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class ToDoListController @Inject()(val controllerComponents: ControllerComponents, repo: ToDoRepoTrait) extends BaseController {
   implicit val todoListJson = Json.format[ToDoList]
 
-  private val todoLists = new mutable.ListBuffer[ToDoList]()
-  todoLists += ToDoList(1, "List1")
-  todoLists += ToDoList(2, "List2")
-
   def getAll: Action[AnyContent] = Action {
+    val todoLists = repo.getToDoLists
     if(todoLists.isEmpty) {
       NoContent
     } else {
