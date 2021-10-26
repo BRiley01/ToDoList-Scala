@@ -22,11 +22,11 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
     }
   }
 
-  /*def getById(itemId: Long): Action[AnyContent] = Action {
-    val itemOption = todoList.find(i => i.id == itemId)
-    itemOption match {
+  def getList(listId: Long): Action[AnyContent] = Action {
+    val todoList = repo.getList(listId)
+    todoList match {
       case Some(item) => Ok(Json.toJson(item))
       case None => NotFound
     }
-  }*/
+  }
 }

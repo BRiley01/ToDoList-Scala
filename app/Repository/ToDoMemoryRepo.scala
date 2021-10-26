@@ -11,4 +11,5 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
   todoLists += ToDoList(2, "List2")
 
   def getToDoLists: ListBuffer[ToDoList] = todoLists
+  def getList(listId: Long): Option[ToDoList] = todoLists.find(l => l.id == listId)
 }

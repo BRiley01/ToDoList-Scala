@@ -1,5 +1,5 @@
 GET     /api/v1/todo-lists                              controllers.ToDoListController.getAll
-#GET     /api/v1/todo-lists/:listId                      controllers.ToDoListController.getList(listId)
+GET     /api/v1/todo-lists/:listId                      controllers.ToDoListController.getList(listId: Long)
 #POST    /api/v1/todo-lists                              controllers.ToDoListController.addNewList
 #PUT     /api/v1/todo-lists/:listId                      controllers.ToDoListController.updateList(listId)
 #DELETE  /api/v1/todo-lists/:listId                      controllers.ToDoListController.deleteList(listId)

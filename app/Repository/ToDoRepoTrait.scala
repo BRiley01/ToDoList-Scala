@@ -8,4 +8,5 @@ import scala.collection.mutable.ListBuffer
 @ImplementedBy(classOf[ToDoMemoryRepo])
 trait ToDoRepoTrait {
   def getToDoLists: ListBuffer[ToDoList]
+  def getList(listId: Long): Option[ToDoList]
 }
