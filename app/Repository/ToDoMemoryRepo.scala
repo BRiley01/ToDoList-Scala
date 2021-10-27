@@ -5,7 +5,7 @@ import scala.collection.immutable.HashMap
 
 class ToDoMemoryRepo extends ToDoRepoTrait {
   private var listTasks = new HashMap[ToDoList, HashMap[Long, TaskItem]]
-  private var todoLists: HashMap[Long, ToDoList] = HashMap((1L -> ToDoList(1, "List1")), (2L -> ToDoList(2, "List2")))
+  private var todoLists: HashMap[Long, ToDoList] = HashMap(1L -> ToDoList(1, "List1"), 2L -> ToDoList(2, "List2"))
 
   private def nextId =
     todoLists.keySet.maxOption match {
@@ -23,7 +23,7 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
       }
   }
 
-  override def getToDoLists = todoLists.values.toList
+  override def getToDoLists:List[ToDoList] = todoLists.values.toList
   override def getList(listId: Long): Option[ToDoList] = {
     if(todoLists.contains(listId))
       Some(todoLists(listId))
@@ -58,7 +58,7 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
     }
   }
 
-  def OptToBool[x](opt: Option[x]) = opt match {
+  def OptToBool[x](opt: Option[x]): Boolean = opt match {
     case Some(a) => true
     case None => false
   }
@@ -86,7 +86,7 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
         else
           return None
       }
-      Some(results.toList)
+      Some(results)
     }
   }
 
