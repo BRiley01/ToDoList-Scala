@@ -20,6 +20,7 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
   implicit val updateToDoListJson = Json.format[UpdateToDoList]
   implicit val taskItemJson = Json.format[TaskItem]
   implicit val newTaskJson = Json.format[NewTask]
+  implicit val updateTaskJson = Json.format[UpdateTask]
 
 
   def getAllLists: Action[AnyContent] = Action {
@@ -106,5 +107,25 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
       .getOrElse{
         BadRequest("Expecting application/json request body")
       }
+  }
+
+  def updateListTask(listId: Long, taskId: Long) = Action { implicit request =>
+    val jsonBody = request.body.asJson
+
+    jsonBody
+      .map {json =>
+        repo.updateTask(listId, taskId, json.as[UpdateTask]) match {
+          case Some(task) => Ok(Json.toJson(task))
+          case None => BadRequest
+        }
+      }
+      .getOrElse{
+        BadRequest("Expecting application/json request body")
+      }
+  }
+
+  def deleteListTask(listId: Long, taskId: Long) = Action {
+    if(repo.deleteTask(listId, taskId)) Ok
+    else BadRequest
   }
 }

@@ -13,6 +13,8 @@ trait ToDoRepoTrait {
   def getTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String]): Option[List[TaskItem]]
   def getTask(listId: Long, taskId: Long): Option[TaskItem]
   def addTaskToList(listId: Long, task: NewTask): Option[TaskItem]
+  def updateTask(listId: Long, taskId: Long, task: UpdateTask): Option[TaskItem]
+  def deleteTask(listId: Long, taskId: Long): Boolean
 }
 
 

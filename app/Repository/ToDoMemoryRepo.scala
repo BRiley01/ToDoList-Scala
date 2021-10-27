@@ -7,6 +7,11 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
   private var listTasks = new HashMap[ToDoList, HashMap[Long, TaskItem]]
   private var todoLists: HashMap[Long, ToDoList] = HashMap(1L -> ToDoList(1, "List1"), 2L -> ToDoList(2, "List2"))
 
+  private def OptToBool[x](opt: Option[x]): Boolean = opt match {
+    case Some(a) => true
+    case None => false
+  }
+
   private def nextId =
     todoLists.keySet.maxOption match {
       case Some(newId) => newId+1
@@ -56,11 +61,6 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
       todoLists -= listId
       true
     }
-  }
-
-  def OptToBool[x](opt: Option[x]): Boolean = opt match {
-    case Some(a) => true
-    case None => false
   }
 
   override def getTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String]): Option[List[TaskItem]] = {
@@ -125,4 +125,44 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
     }
   }
 
+  override def updateTask(listId: Long, taskId: Long, task: UpdateTask): Option[TaskItem] = {
+    //Greatly simplifies "if" logic, as would need to gradually chain more components
+    lazy val todoList = todoLists(listId)
+    lazy val listTask = listTasks(todoList)
+    lazy val origTask = listTask(taskId)
+
+    if(!(todoLists.contains(listId) && listTasks.contains(todoList) && listTask.contains(taskId)))
+      None
+    else{
+      origTask
+      val updatedTask = TaskItem(
+        id = origTask.id,
+        title = task.title.getOrElse(origTask.title),
+        priority = task.priority.getOrElse(origTask.priority),
+        completed = task.completed.getOrElse(origTask.completed),
+        dueDate = task.dueDate.getOrElse(origTask.dueDate)
+      )
+
+      val updateTasks = listTask + (updatedTask.id -> updatedTask)
+
+      //By doing this in one line reduces chance of concurrent operation on Hashset
+      listTasks = listTasks - todoList + (todoList -> updateTasks)
+      Some(updatedTask)
+    }
+  }
+
+  override def deleteTask(listId: Long, taskId: Long): Boolean = {
+    //Greatly simplifies "if" logic, as would need to gradually chain more components
+    lazy val todoList = todoLists(listId)
+    lazy val listTask = listTasks(todoList)
+    if(!(todoLists.contains(listId) && listTasks.contains(todoList) && listTask.contains(taskId)))
+      false
+    else {
+      val updateTasks = listTask - taskId
+      //By doing this in one line reduces chance of concurrent operation on Hashset
+      listTasks = listTasks - todoList + (todoList -> updateTasks)
+      true
+    }
+
+  }
 }
