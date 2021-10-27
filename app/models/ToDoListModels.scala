@@ -7,5 +7,7 @@ case class NewToDoList(listName: String)
 case class UpdateToDoList(listName: String)
 case class ToDoList(id: Long, listName: String)
 
+//Datetime format for joda: YYYY-MM-DDThh:mm:ss-zz:00  (where zz= timezone offset)
+
 case class TaskItem(id: Long, title: String, priority: Int, completed: Boolean, dueDate: Option[DateTime])
 case class NewTask(title: String, priority: Int, completed: Boolean, dueDate: Option[DateTime])
