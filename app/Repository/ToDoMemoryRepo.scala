@@ -1,50 +1,61 @@
 package Repository
 
-import models.{ListTask, NewTask, NewToDoList, TaskItem, ToDoList, UpdateToDoList}
-
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import models._
+import scala.collection.immutable.HashMap
 
 class ToDoMemoryRepo extends ToDoRepoTrait {
-  private val listTasks = new mutable.ListBuffer[ListTask]()
-  private val todoLists = new mutable.ListBuffer[ToDoList]()
+  private var listTasks = new HashMap[ToDoList, List[TaskItem]]
+  private var todoLists: HashMap[Long, ToDoList] = HashMap((1L -> ToDoList(1, "List1")), (2L -> ToDoList(2, "List2")))
 
-  todoLists += ToDoList(1, "List1")
-  todoLists += ToDoList(2, "List2")
   private def nextId =
-    todoLists.map(_.id).maxOption match {
+    todoLists.keySet.maxOption match {
       case Some(newId) => newId+1
       case None => 1
     }
 
-  private def nextTaskId(todoList: ToDoList) =
-    listTasks.filter(lt => lt.list == todoList).map(_.list.id).maxOption match {
-      case Some(newId) => newId+1
-      case None => 1
-    }
+  private def nextTaskId(todoList: ToDoList): Long = {
+    if(!listTasks.contains(todoList))
+      1
+    else
+      listTasks(todoList).map(_.id).maxOption match {
+        case Some(newId) => newId+1
+        case None => 1
+      }
+  }
 
-  override def getToDoLists: ListBuffer[ToDoList] = todoLists
-  override def getList(listId: Long): Option[ToDoList] = todoLists.find(l => l.id == listId)
+  override def getToDoLists = todoLists.values.toList
+  override def getList(listId: Long): Option[ToDoList] = {
+    if(todoLists.contains(listId))
+      Some(todoLists(listId))
+    else
+      None
+  }
   override def updateTodoList(listId: Long, updatedList: UpdateToDoList): Option[ToDoList] = {
-    val index = todoLists.indexWhere(l => l.id == listId)
-    if(index == -1) None
-    todoLists(index) = todoLists(index).copy(listName = updatedList.listName)
-    Some(todoLists(index))
+    if(!todoLists.contains(listId))
+      None
+    else{
+      val update = todoLists(listId).copy(listName = updatedList.listName)
+      todoLists -= listId
+      todoLists += (update.id -> update)
+      Some(todoLists(listId))
+    }
   }
 
   override def addTodoList(newList: NewToDoList): Option[ToDoList] = {
     //Although we're adding regardless, return an option in case we want business logic to prevent adding
     val toAdd = ToDoList(nextId, newList.listName)
-    todoLists += toAdd
+    todoLists += (toAdd.id -> toAdd)
     Some(toAdd)
   }
 
   override def deleteToDoList(listId: Long): Boolean = {
-    val index = todoLists.indexWhere(l => l.id == listId)
-    if(index == -1)
+    if(!todoLists.contains(listId))
       false
-    todoLists.remove(index)
-    true
+    else
+    {
+      todoLists -= listId
+      true
+    }
   }
 
   def OptToBool[x](opt: Option[x]) = opt match {
@@ -53,34 +64,52 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
   }
 
   override def getTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String]): Option[List[TaskItem]] = {
-    var results = listTasks.filter(lt => lt.list.id == listId).map(lt => lt.task)
-    if (OptToBool(priority)) {
-      results = results.filter(t => t.priority == priority.get)
+    if(!todoLists.contains(listId))
+      None
+    else {
+      val todoList = todoLists(listId)
+      if(!listTasks.contains(todoList)) {
+        return Some(List[TaskItem]())
+      }
+      var results = listTasks(todoList)
+      if (OptToBool(priority)) {
+        results = results.filter(t => t.priority == priority.get)
+      }
+      if (OptToBool(completed)) {
+        results = results.filter(t => t.completed == completed.get)
+      }
+      if (OptToBool(orderby)) {
+        if (orderby.get == "due-date")
+          results = results.sortBy(t => t.dueDate)
+        else if (orderby.get == "priority")
+          results = results.sortBy(t => t.priority)
+        else
+          return None
+      }
+      Some(results.toList)
     }
-    if(OptToBool(completed)) {
-      results = results.filter(t => t.completed == completed.get)
-    }
-    if(OptToBool(orderby)) {
-      if(orderby.get == "due-date")
-        results = results.sortBy(t => t.dueDate)
-      else if(orderby.get == "priority")
-        results = results.sortBy(t => t.priority)
-      else
-        return None
-    }
-    if(results.isEmpty) None
-    Some(results.toList)
+
   }
 
   override def addTaskToList(listId: Long, task: NewTask): Option[TaskItem] = {
-    todoLists.find(l => l.id == listId) match
-    {
-      case Some(todoList) => {
-        val newTask = TaskItem(nextTaskId(todoList), task.title, task.priority, task.completed, task.dueDate)
-        listTasks += ListTask(todoList, newTask)
-        Some(newTask)
-      }
-      case None => None
+    if(!todoLists.contains(listId))
+      None
+    else {
+      //Get todoList by ID -- we already know it exists from the line above
+      //Technically between the contains and the lookup, item could be removed.
+      //If that were the case it will throw an exception and I'm fine with that for now
+      val todoList = todoLists(listId)
+
+      //Create a new task by getting the highest prior taskID in the list
+      val newTask = TaskItem(nextTaskId(todoList), task.title, task.priority, task.completed, task.dueDate)
+
+      // Get the old list of tasks, remove it from the hashmap
+      // re-add a copy of the oldlist with the new item added (maintains immutability of list)
+      val oldList = if (listTasks.contains(todoList)) listTasks(todoList) else List[TaskItem]()
+
+      //By doing this in one line reduces chance of concurrent operation on Hashset
+      listTasks = listTasks - todoList + (todoList -> (oldList :+ newTask)) //Append new task item to end of list
+      Some(newTask)
     }
   }
 

@@ -78,14 +78,8 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
     val tasksOpt =  repo.getTasks(listId, priority, completed, orderby)
     tasksOpt match
     {
-      case Some(tasks) => {
-        if(tasks.isEmpty) {
-          NoContent
-        } else {
-          Ok(Json.toJson(tasks))
-        }
-      }
-      case None => NoContent
+      case Some(tasks) => Ok(Json.toJson(tasks))
+      case None => BadRequest
     }
   }
 
