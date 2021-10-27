@@ -116,8 +116,8 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
 
       // Get the old list of tasks, remove it from the hashmap
       // re-add a copy of the oldlist with the new item added (maintains immutability of list)
-      var updateTasks = if (listTasks.contains(todoList)) listTasks(todoList) else HashMap[Long, TaskItem]()
-      updateTasks += (newTask.id -> newTask)
+      // Done in one line to eliminate need for var
+      val updateTasks = (if (listTasks.contains(todoList)) listTasks(todoList) else HashMap[Long, TaskItem]()) + (newTask.id -> newTask)
 
       //By doing this in one line reduces chance of concurrent operation on Hashset
       listTasks = listTasks - todoList + (todoList -> updateTasks)
