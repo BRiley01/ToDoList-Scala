@@ -4,7 +4,7 @@ import models._
 import scala.collection.immutable.HashMap
 
 class ToDoMemoryRepo extends ToDoRepoTrait {
-  private var listTasks = new HashMap[ToDoList, List[TaskItem]]
+  private var listTasks = new HashMap[ToDoList, HashMap[Long, TaskItem]]
   private var todoLists: HashMap[Long, ToDoList] = HashMap((1L -> ToDoList(1, "List1")), (2L -> ToDoList(2, "List2")))
 
   private def nextId =
@@ -17,7 +17,7 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
     if(!listTasks.contains(todoList))
       1
     else
-      listTasks(todoList).map(_.id).maxOption match {
+      listTasks(todoList).keySet.maxOption match {
         case Some(newId) => newId+1
         case None => 1
       }
@@ -71,7 +71,7 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
       if(!listTasks.contains(todoList)) {
         return Some(List[TaskItem]())
       }
-      var results = listTasks(todoList)
+      var results = listTasks(todoList).values.toList
       if (OptToBool(priority)) {
         results = results.filter(t => t.priority == priority.get)
       }
@@ -88,7 +88,18 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
       }
       Some(results.toList)
     }
+  }
 
+  override def getTask(listId: Long, taskId: Long): Option[TaskItem] = {
+    if(!todoLists.contains(listId))
+      None
+    else {
+      val todoList = todoLists(listId)
+      if(listTasks.contains(todoList) && listTasks(todoList).contains(taskId))
+        Some(listTasks(todoList)(taskId))
+      else
+        None
+    }
   }
 
   override def addTaskToList(listId: Long, task: NewTask): Option[TaskItem] = {
@@ -105,10 +116,11 @@ class ToDoMemoryRepo extends ToDoRepoTrait {
 
       // Get the old list of tasks, remove it from the hashmap
       // re-add a copy of the oldlist with the new item added (maintains immutability of list)
-      val oldList = if (listTasks.contains(todoList)) listTasks(todoList) else List[TaskItem]()
+      var updateTasks = if (listTasks.contains(todoList)) listTasks(todoList) else HashMap[Long, TaskItem]()
+      updateTasks += (newTask.id -> newTask)
 
       //By doing this in one line reduces chance of concurrent operation on Hashset
-      listTasks = listTasks - todoList + (todoList -> (oldList :+ newTask)) //Append new task item to end of list
+      listTasks = listTasks - todoList + (todoList -> updateTasks)
       Some(newTask)
     }
   }

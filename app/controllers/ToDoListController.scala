@@ -83,6 +83,15 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
     }
   }
 
+  def getListTask(listId: Long, taskId: Long) = Action {
+    val taskOpt =  repo.getTask(listId, taskId)
+    taskOpt match
+    {
+      case Some(task) => Ok(Json.toJson(task))
+      case None => BadRequest
+    }
+  }
+
   def addListTask(listId: Long) = Action { implicit request =>
     val jsonBody = request.body.asJson
 
@@ -97,6 +106,5 @@ class ToDoListController @Inject()(val controllerComponents: ControllerComponent
       .getOrElse{
         BadRequest("Expecting application/json request body")
       }
-
   }
 }

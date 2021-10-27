@@ -5,7 +5,7 @@ PUT     /api/v1/todo-lists/:listId                      controllers.ToDoListCont
 DELETE  /api/v1/todo-lists/:listId                      controllers.ToDoListController.deleteList(listId: Long)
 
 GET     /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.getListTasks(listId: Long, priority: Option[Int], completed: Option[Boolean], orderby: Option[String])
-#GET     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.getListTasks(listId, taskId)
+GET     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.getListTask(listId: Long, taskId: Long)
 POST    /api/v1/todo-lists/:listId/tasks                controllers.ToDoListController.addListTask(listId: Long)
 #PUT     /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
 #DELETE  /api/v1/todo-lists/:listId/tasks/:taskId        controllers.ToDoListController.updateListTask(listId, taskId)
